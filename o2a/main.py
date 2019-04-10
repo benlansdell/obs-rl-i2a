@@ -1,6 +1,9 @@
 # Inspired from OpenAI Baselines. This uses the same design of having an easily
 # substitutable generic policy that can be trained. This allows to easily
 # substitute in the I2A policy as opposed to the basic CNN one.
+import os
+os.environ["CUDA_VISIBLE_DEVICES"]="0"
+
 
 import numpy as np
 import tensorflow as tf

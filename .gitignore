@@ -3,5 +3,8 @@ logs
 __pycache__
 .ipynb_checkpoints
 env_logs
+*.pyc
 a2c_logs
 i2a_logs
+*.swp
+o2a.egg-info
