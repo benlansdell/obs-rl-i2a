@@ -12,15 +12,13 @@ for i in range(N_OBJS):
 pixel_to_categorical = {pix:i for i, pix in enumerate(pixels)}
 num_pixels = len(pixels)
 
+#Rewards: -0.5/env.max_steps, or 1
+#Make this not hard coded....
+ENV_MAX_STEPS = 144
+
 # The mode I typically used was regular. These rewards will also be encoded as
 # integers.
-mode_rewards = {
-    "regular": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
-    "avoid":   [0.1, -0.1, -5, -10, -20],
-    "hunt":    [0, 1, 10, -20],
-    "ambush":  [0, -0.1, 10, -20],
-    "rush":    [0, -0.1, 9.9]
-}
+mode_rewards = {"regular": [-1./ENV_MAX_STEPS, 1]}
 reward_to_categorical = {mode: {reward:i for i, reward in enumerate(mode_rewards[mode])} for mode in mode_rewards.keys()}
 
 # Helper functions to convert between the encoded integers and the actual

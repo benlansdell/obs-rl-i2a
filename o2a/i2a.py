@@ -4,14 +4,12 @@ import time
 import logging
 import numpy as np
 import tensorflow as tf
-from common.minipacman import MiniPacman
 from common.multiprocessing_env import SubprocVecEnv
 from tqdm import tqdm
 
 from env_model import create_env_model
 from a2c import get_actor_critic, CnnPolicy
-from common.pacman_util import num_pixels, mode_rewards, pix_to_target, rewards_to_target, mode_rewards, target_to_pix
-
+from common.minigrid_util import num_pixels, mode_rewards, pix_to_target, rewards_to_target, mode_rewards, target_to_pix
 
 # Hyperparameter of how far ahead in the future the agent "imagines"
 # Currently this is specifying one frame in the future.
@@ -82,6 +80,8 @@ def convert_target_to_real(batch_size, nw, nh, nc, imagined_state, imagined_rewa
     imagined_state = target_to_pix(imagined_state)
     imagined_state = imagined_state.reshape((batch_size, nw, nh,
         nc))
+
+
 
     imagined_reward = softmax(imagined_reward, axis=1)
     imagined_reward = np.argmax(imagined_reward, axis=1)
