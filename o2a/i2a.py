@@ -213,6 +213,7 @@ class I2aPolicy(object):
             c2 = tf.layers.conv2d(c1, 16, kernel_size=3,
                     strides=2, padding='valid', activation=tf.nn.relu)
 
+            #Do all these numbers have to change?? What is 6 and 8?
             features = tf.reshape(c2, [state_batch_size, 6 * 8 * 16])
 
             self.features = features
@@ -247,6 +248,7 @@ class I2aPolicy(object):
         features = tf.layers.conv2d(c1, 16, kernel_size=3, strides=2,
                 padding='valid', activation=tf.nn.relu)
 
+        #Is this size hard coded?
         features = tf.reshape(features, [num_steps, batch_size, 6 * 8 * 16])
 
         rnn_input = tf.concat([features, reward], 2)

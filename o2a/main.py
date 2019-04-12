@@ -4,11 +4,14 @@
 import os
 os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
+#A test env: "MiniGrid-Blocks-6x6-v0"
 
 import numpy as np
 import tensorflow as tf
 from common.minipacman import MiniPacman
 from common.multiprocessing_env import SubprocVecEnv
+import gym
+import gym_minigrid
 from tqdm import tqdm
 import argparse
 from i2a import I2aPolicy
@@ -44,14 +47,20 @@ def discount_with_dones(rewards, dones, GAMMA):
 
 
 def train(policy, save_name, load_count = 0, summarize=True, load_path=None, log_path = './logs'):
-    def make_env():
-        def _thunk():
-            env = MiniPacman(REWARD_MODE, 1000)
-            return env
+    
+    #Pacman...
+    #def make_env():
+    #    def _thunk():
+    #        env = MiniPacman(REWARD_MODE, 1000)
+    #        return env
+    #    return _thunk
 
-        return _thunk
+    #Minigrid env
+    env_name = "MiniGrid-Blocks-6x6-v0"
+    def make_env(env_name):
+        return lambda: gym_minigrid.wrappers.ImgObsWrapper(gym.make(env_name))
 
-    envs = [make_env() for i in range(N_ENVS)]
+    envs = [make_env(env_name) for i in range(N_ENVS)]
     envs = SubprocVecEnv(envs)
 
     ob_space = envs.observation_space.shape
