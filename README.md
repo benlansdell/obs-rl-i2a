@@ -1,4 +1,6 @@
-# Imagination Augmented Agents
+# Observation Augmented Agents
+
+Builds on:
 
 ## Description
 TensorFlow implementation of [Imagination Augmented Agents](https://arxiv.org/abs/1707.06203) by DeepMind, published as a conference proceeding at NIPS 2017. This paper combines model free and model
