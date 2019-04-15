@@ -15,9 +15,9 @@ from tqdm import tqdm
 from common.minigrid_util import num_pixels, mode_rewards, pix_to_target, rewards_to_target
 
 # How many iterations we are training the environment model for.
-NUM_UPDATES = 5000
+NUM_UPDATES = 25000
 
-LOG_INTERVAL = 100
+LOG_INTERVAL = 500
 
 N_ENVS = 16
 N_STEPS = 5
