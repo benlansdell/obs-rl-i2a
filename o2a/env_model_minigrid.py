@@ -2,6 +2,8 @@
 # details.
 
 import os
+os.environ["CUDA_VISIBLE_DEVICES"]=""
+
 import tensorflow as tf
 from common.minipacman import MiniPacman
 import gym
@@ -15,7 +17,7 @@ from tqdm import tqdm
 from common.minigrid_util import num_pixels, mode_rewards, pix_to_target, rewards_to_target
 
 # How many iterations we are training the environment model for.
-NUM_UPDATES = 25000
+NUM_UPDATES = 5000
 
 LOG_INTERVAL = 500
 
@@ -27,7 +29,7 @@ N_STEPS = 5
 REWARD_MODE = 'regular'
 
 # Replace this with the location of your own weights. This is a partially trained model... 
-A2C_WEIGHTS = 'weights/a2c_200000.ckpt'
+A2C_WEIGHTS = 'weights/a2c_1000000.ckpt'
 
 def pool_inject(X, batch_size, depth, width, height):
     m = tf.layers.max_pooling2d(X, pool_size=(width, height), strides=(width, height))
@@ -65,9 +67,15 @@ def basic_block(X, batch_size, depth, width, height, n1, n2, n3):
 
     return tf.concat([c, X], axis=-1)
 
+""" ###########################################################################"""
+""" ###########################################################################"""
+""" ###########################################################################"""
+""" ###########################################################################"""
+""" ###########################################################################"""
+""" ###########################################################################"""
 
 def create_env_model(obs_shape, num_actions, num_pixels, num_rewards,
-        should_summary=True, reward_coeff=0.1):
+        should_summary=True, reward_coeff=1.0):
     width = obs_shape[0]
     height = obs_shape[1]
     depth = obs_shape[2]
@@ -102,8 +110,8 @@ def create_env_model(obs_shape, num_actions, num_pixels, num_rewards,
         reward = tf.layers.conv2d(bb2, 64, kernel_size=1,
                 activation=tf.nn.relu)
 
-        reward = tf.layers.conv2d(reward, 64, kernel_size=1,
-                activation=tf.nn.relu)
+        #reward = tf.layers.conv2d(reward, 64, kernel_size=1,
+        #        activation=tf.nn.relu)
 
         reward = tf.reshape(reward, [batch_size, width * height * 64])
 
@@ -115,11 +123,11 @@ def create_env_model(obs_shape, num_actions, num_pixels, num_rewards,
     target_reward_one_hot = tf.one_hot(target_rewards, depth=num_rewards)
     reward_loss = tf.losses.softmax_cross_entropy(target_reward_one_hot, reward)
 
-    #loss = image_loss + (reward_coeff * reward_loss)
+    loss = image_loss + (reward_coeff * reward_loss)
     #Just learn image_loss
-    loss = image_loss
+    #loss = image_loss
 
-    opt = tf.train.AdamOptimizer().minimize(loss)
+    opt = tf.train.AdamOptimizer(beta1 = 0.9, beta2 = 0.999).minimize(loss)
 
     # Tensorboard
     if should_summary:
@@ -130,6 +138,94 @@ def create_env_model(obs_shape, num_actions, num_pixels, num_rewards,
     return EnvModelData(image, reward, states, onehot_actions, loss,
             reward_loss, image_loss, target_states, target_rewards, opt)
 
+""" ###########################################################################"""
+""" ###########################################################################"""
+""" ###########################################################################"""
+""" ###########################################################################"""
+""" ###########################################################################"""
+""" ###########################################################################"""
+
+def create_latentinverse_env_model(obs_shape, num_actions, num_pixels, num_rewards,
+        should_summary=True, reward_coeff=1.0):
+    width = obs_shape[0]
+    height = obs_shape[1]
+    depth = obs_shape[2]
+
+    #Common encoding
+    ## 3 CNNs. 3x3 kernel, stride 2, 32 filters. ReLU non-linearity
+
+    #Create forward model:
+    ## 
+
+    #Create inverse model:
+
+    #Loss is joint between forward and inverse model
+
+    states = tf.placeholder(tf.float32, [None, width, height, depth])
+
+    onehot_actions = tf.placeholder(tf.float32, [None, width,
+        height, num_actions])
+
+    batch_size = tf.shape(states)[0]
+
+    target_states = tf.placeholder(tf.uint8, [None])
+    target_rewards = tf.placeholder(tf.uint8, [None])
+
+    inputs = tf.concat([states, onehot_actions], axis=-1)
+
+    with tf.variable_scope('pre_conv'):
+        c = tf.layers.conv2d(inputs, 64, kernel_size=1, activation=tf.nn.relu)
+
+    with tf.variable_scope('basic_block_1'):
+        bb1 = basic_block(c, batch_size, 64, width, height, 16, 32, 64)
+
+    with tf.variable_scope('basic_block_2'):
+        bb2 = basic_block(bb1, batch_size, 128, width, height, 16, 32, 64)
+
+    with tf.variable_scope('image_conver'):
+        image = tf.layers.conv2d(bb2, 256, kernel_size=1, activation=tf.nn.relu)
+        image = tf.reshape(image, [batch_size * width * height, 256])
+        image = tf.layers.dense(image, num_pixels)
+
+    with tf.variable_scope('reward'):
+        reward = tf.layers.conv2d(bb2, 64, kernel_size=1,
+                activation=tf.nn.relu)
+
+        #reward = tf.layers.conv2d(reward, 64, kernel_size=1,
+        #        activation=tf.nn.relu)
+
+        reward = tf.reshape(reward, [batch_size, width * height * 64])
+
+        reward = tf.layers.dense(reward, num_rewards)
+
+    target_states_one_hot = tf.one_hot(target_states, depth=num_pixels)
+    image_loss = tf.losses.softmax_cross_entropy(target_states_one_hot, image)
+
+    target_reward_one_hot = tf.one_hot(target_rewards, depth=num_rewards)
+    reward_loss = tf.losses.softmax_cross_entropy(target_reward_one_hot, reward)
+
+    loss = image_loss + (reward_coeff * reward_loss)
+    #Just learn image_loss
+    #loss = image_loss
+
+    opt = tf.train.AdamOptimizer(beta1 = 0.9, beta2 = 0.999).minimize(loss)
+
+    # Tensorboard
+    if should_summary:
+        tf.summary.scalar('Loss', loss)
+        tf.summary.scalar('Reward Loss', reward_loss)
+        tf.summary.scalar('Image Loss', image_loss)
+
+    return EnvModelData(image, reward, states, onehot_actions, loss,
+            reward_loss, image_loss, target_states, target_rewards, opt)
+
+""" ###########################################################################"""
+""" ###########################################################################"""
+""" ###########################################################################"""
+""" ###########################################################################"""
+""" ###########################################################################"""
+""" ###########################################################################"""
+
 #Minigrid env
 env_name = "MiniGrid-Blocks-6x6-v0"
 def make_env(env_name):
@@ -137,14 +233,20 @@ def make_env(env_name):
 
 def play_games(actor_critic, envs, frames):
     states = envs.reset()
-
     for frame_idx in range(frames):
+        #Reset when done...
+        #if frame_idx % 200 == 0:
+        #    print("Resetting")
+        #    states = envs.reset()
         actions, _, _ = actor_critic.act(states)
-
         next_states, rewards, dones, _ = envs.step(actions)
-
+        #print(rewards)
+        #print(dones)
+        #if np.any(rewards > 0):
+        #    print("We have a winner")
+        #if np.any(dones == True):
+        #    print("We are done")
         yield frame_idx, states, actions, rewards, next_states, dones
-
         states = next_states
 
 class EnvModelData(object):
@@ -162,6 +264,15 @@ class EnvModelData(object):
         self.target_rewards   = target_rewards
         self.opt              = opt
 
+def initialize_uninitialized_vars(sess):
+    from itertools import compress
+    global_vars = tf.global_variables()
+    is_not_initialized = sess.run([~(tf.is_variable_initialized(var)) \
+                                   for var in global_vars])
+    not_initialized_vars = list(compress(global_vars, is_not_initialized))
+
+    if len(not_initialized_vars):
+        sess.run(tf.variables_initializer(not_initialized_vars))
 
 if __name__ == '__main__':
     envs = [make_env(env_name) for i in range(N_ENVS)]
@@ -172,15 +283,22 @@ if __name__ == '__main__':
     num_actions = envs.action_space.n
 
     with tf.Session() as sess:
-        actor_critic = get_actor_critic(sess, N_ENVS, N_STEPS, ob_space, ac_space, CnnPolicy, should_summary=False)
-        actor_critic.load(A2C_WEIGHTS)
+
+        #Interactive mode
+        #sess = tf.Session()
+
+        with tf.variable_scope('actor'):
+            actor_critic = get_actor_critic(sess, N_ENVS, N_STEPS, ob_space, ac_space, CnnPolicy, should_summary=False)    
+            actor_critic.load(A2C_WEIGHTS)
 
         with tf.variable_scope('env_model'):
             env_model = create_env_model(ob_space, num_actions, num_pixels,
                     len(mode_rewards[REWARD_MODE]))
 
         summary_op = tf.summary.merge_all()
-        sess.run(tf.global_variables_initializer())
+        #This seems to overwrite parameters from actor model...
+        #sess.run(tf.global_variables_initializer())
+        initialize_uninitialized_vars(sess)
 
         losses = []
         all_rewards = []
@@ -195,9 +313,14 @@ if __name__ == '__main__':
         writer = tf.summary.FileWriter('./env_logs', graph=sess.graph)
 
         for frame_idx, states, actions, rewards, next_states, dones in tqdm(play_games(actor_critic, envs, NUM_UPDATES), total=NUM_UPDATES):
+            #Interactive...
+            #frame_idx, states, actions, rewards, next_states, dones = next(play_games(actor_critic, envs, NUM_UPDATES))
+            
+            #print("Action %d"%actions[0])
+            #print(states[0])
             target_state = pix_to_target(next_states)
             target_reward = rewards_to_target(REWARD_MODE, rewards)
-
+            #print(rewards, target_reward, dones)
             onehot_actions = np.zeros((N_ENVS, num_actions, width, height))
             onehot_actions[range(N_ENVS), actions] = 1
             # Change so actions are the 'depth of the image' as tf expects

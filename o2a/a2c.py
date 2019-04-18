@@ -126,7 +126,7 @@ class ActorCritic(object):
             tf.summary.scalar('Value function loss', self.vf_loss)
 
         name_scope = tf.contrib.framework.get_name_scope()
-
+        
         # Used if we are loading in a scope different than what we saved in.
         def fix_tf_name(name, name_scope=None):
             if name_scope is not None:
