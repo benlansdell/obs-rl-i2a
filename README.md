@@ -37,6 +37,18 @@ is used (`common/deepmind.py`). Implementation of `common/minipacman.py` is from
 See `requirements.txt` for the complete list of requirements I used, however, only the two
 listed above are important.
 
+## Installation
+
+Create conda environment
+`conda create -n o2a python=3.6`
+`source activate o2a`
+`conda install --yes --file requirements.txt`
+`conda install cudatoolkit=9.0`
+`conda install cudnn=9.0`
+`pip install -e .`
+`cd ../gym-minigrid/; pip install -e .`
+
+
 ## Usage
 Train the actor critic model using the following. Training this is a necessary
 baseline and needs to be used to train the environment model.
