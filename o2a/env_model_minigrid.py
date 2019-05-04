@@ -2,7 +2,7 @@
 # details.
 
 import os
-os.environ["CUDA_VISIBLE_DEVICES"]=""
+os.environ["CUDA_VISIBLE_DEVICES"]="0,1,2"
 
 import tensorflow as tf
 import gym

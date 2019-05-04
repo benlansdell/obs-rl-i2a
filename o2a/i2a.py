@@ -16,8 +16,7 @@ from common.minigrid_util import num_pixels, mode_rewards, pix_to_target, reward
 NUM_ROLLOUTS = 1
 
 # Hidden size in RNN imagination encoder.
-HIDDEN_SIZE = 256
-
+HIDDEN_SIZE = 128
 N_STEPS = 5
 
 # This can be anything from "regular" "avoid" "hunt" "ambush" "rush" each
@@ -80,13 +79,10 @@ def convert_target_to_real(batch_size, nw, nh, nc, imagined_state, imagined_rewa
     imagined_state = target_to_pix(imagined_state)
     imagined_state = imagined_state.reshape((batch_size, nw, nh, nc))
 
-
-
     imagined_reward = softmax(imagined_reward, axis=1)
     imagined_reward = np.argmax(imagined_reward, axis=1)
 
     return imagined_state, imagined_reward
-
 
 """
 Used to generate rollouts of imagined states.
@@ -213,11 +209,11 @@ class I2aPolicy(object):
                     strides=2, padding='valid', activation=tf.nn.relu)
 
             #Do all these numbers have to change?? What is 6 and 8?
-            features = tf.reshape(c2, [state_batch_size, 6 * 8 * 16])
+            features = tf.reshape(c2, [state_batch_size, 6 * 6 * 16])
 
             self.features = features
 
-            hidden_state = tf.reshape(hidden_state, [state_batch_size, 80 * 256
+            hidden_state = tf.reshape(hidden_state, [state_batch_size, 80 * HIDDEN_SIZE
                 // 16])
 
             # Combine both paths
@@ -248,7 +244,7 @@ class I2aPolicy(object):
                 padding='valid', activation=tf.nn.relu)
 
         #Is this size hard coded?
-        features = tf.reshape(features, [num_steps, batch_size, 6 * 8 * 16])
+        features = tf.reshape(features, [num_steps, batch_size, 6 * 6 * 16])
 
         rnn_input = tf.concat([features, reward], 2)
 

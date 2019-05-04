@@ -2,7 +2,7 @@
 # substitutable generic policy that can be trained. This allows to easily
 # substitute in the I2A policy as opposed to the basic CNN one.
 import os
-os.environ["CUDA_VISIBLE_DEVICES"]="0"
+os.environ["CUDA_VISIBLE_DEVICES"]="1"
 
 import numpy as np
 import tensorflow as tf
@@ -14,8 +14,11 @@ import argparse
 from i2a import I2aPolicy
 from a2c import CnnPolicy, get_actor_critic
 
-N_ENVS = 16
+#N_ENVS = 16
 N_STEPS = 5
+
+N_ENVS = 8
+#N_STEPS = 1
 
 # Total number of iterations (taking into account number of environments and
 # number of steps). You wish to train for.
