@@ -39,15 +39,15 @@ listed above are important.
 
 ## Installation
 
-Create conda environment
-`conda create -n o2a python=3.6`
-`source activate o2a`
-`conda install --yes --file requirements.txt`
-`conda install cudatoolkit=9.0`
-`conda install cudnn=9.0`
-`pip install -e .`
-`cd ../gym-minigrid/; pip install -e .`
-
+Something like:
+```
+conda create -n o2a python=3.6
+source activate o2a
+pip install -e .
+conda install cudatoolkit=9.0
+conda install cudnn=9.0
+cd ../gym-minigrid/; pip install -e .
+```
 
 ## Usage
 Train the actor critic model using the following. Training this is a necessary
