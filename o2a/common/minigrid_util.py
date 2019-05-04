@@ -1,24 +1,26 @@
 # Common definitions for the minigrid env
 import numpy as np
 
-N_OBJS = 13
-N_COLS = 6
+N_OBJS = 15
+N_COLS = 16
 
 pixels = []
 for i in range(N_OBJS):
     for j in range(N_COLS):
         pixels.append((i,j,0))
+        if i == 3 or i == 11 or i == 14:
+            pixels.append((i, j, 1))
 
 pixel_to_categorical = {pix:i for i, pix in enumerate(pixels)}
 num_pixels = len(pixels)
 
 #Rewards: -0.5/env.max_steps, or 1
 #Make this not hard coded....
-ENV_MAX_STEPS = 144
+ENV_MAX_STEPS = 128
 
 # The mode I typically used was regular. These rewards will also be encoded as
 # integers.
-mode_rewards = {"regular": [-1./ENV_MAX_STEPS, 1]}
+mode_rewards = {"regular": [-1./ENV_MAX_STEPS, 1, 2]}
 reward_to_categorical = {mode: {reward:i for i, reward in enumerate(mode_rewards[mode])} for mode in mode_rewards.keys()}
 
 # Helper functions to convert between the encoded integers and the actual

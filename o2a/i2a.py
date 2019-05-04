@@ -7,7 +7,7 @@ import tensorflow as tf
 from common.multiprocessing_env import SubprocVecEnv
 from tqdm import tqdm
 
-from env_model import create_env_model
+from env_model_minigrid import create_env_model
 from a2c import get_actor_critic, CnnPolicy
 from common.minigrid_util import num_pixels, mode_rewards, pix_to_target, rewards_to_target, mode_rewards, target_to_pix
 
