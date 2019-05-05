@@ -43,9 +43,10 @@ Something like:
 ```
 conda create -n o2a python=3.6
 source activate o2a
+conda install mpich2
 pip install -e .
 conda install cudatoolkit=9.0
-conda install cudnn=9.0
+conda install cudnn
 cd ../gym-minigrid/; pip install -e .
 ```
 
